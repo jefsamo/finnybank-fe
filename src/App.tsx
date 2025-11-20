@@ -7,13 +7,21 @@ import CreateIncident from "./pages/CreateIncident/CreateIncident";
 import AuditLogs from "./pages/AuditLogs/AuditLogs";
 import Reports from "./pages/Reports/Reports";
 import CreateUser from "./pages/CreateUser/CreateUser";
+import Login from "./pages/Login/Login";
+import ProtectedRoute from "./ui/ProtectedRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<AppLayoutMain />}>
-          <Route path="/" element={<Home />} />
+        <Route
+          element={
+            <ProtectedRoute>
+              <AppLayoutMain />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Home />} />
           <Route path="/dashboard" element={<Home />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/reports" element={<Reports />} />
@@ -22,6 +30,7 @@ function App() {
           <Route path="/incidents/1" element={<IncidentDetail />} />
           <Route path="/logs" element={<AuditLogs />} />
         </Route>
+        <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
   );

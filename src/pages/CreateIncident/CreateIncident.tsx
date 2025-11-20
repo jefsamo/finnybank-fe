@@ -10,164 +10,190 @@ import {
   Button,
   Paper,
   Stack,
+  Alert,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { createIncident } from "../../services/incident.service";
+import { useState } from "react";
+import { IconAlertTriangle, IconCheck } from "@tabler/icons-react";
 
-const productOptions = [
-  "Electronic Cards",
-  "Loans",
-  "Electronic Banking",
-  "Investment",
-  "Account Operations",
-  "Others",
-];
+// const productOptions = [
+//   "Electronic Cards",
+//   "Loans",
+//   "Electronic Banking",
+//   "Investment",
+//   "Account Operations",
+//   "Others",
+// ];
 
-const sourceOptions = [
-  "InBranch",
-  "Call Center",
-  "Online",
-  "ATM",
-  "Mobile Banking",
-  "Others",
-];
+// const sourceOptions = [
+//   "InBranch",
+//   "Call Center",
+//   "Online",
+//   "ATM",
+//   "Mobile Banking",
+//   "Others",
+// ];
 
-const caseTypeOptions = ["Complaint", "Enquiry", "Request", "Feedback"];
-const severityOptions = ["Low", "Medium", "High", "Critical"];
+// const caseTypeOptions = ["Complaint", "Enquiry", "Request", "Feedback"];
+// const severityOptions = ["Low", "Medium", "High", "Critical"];
 
-type CreateIncidentFormValues = {
-  customerName: string;
-  mobileNumber: string;
-  product: string | null;
-  source: string | null;
-  caseType: string | null;
-  severity: string | null;
-  cardFirst4: string;
-  cardLast4: string;
-  comment: string;
-};
+// type CreateIncidentFormValues = {
+//   customerName: string;
+//   phoneNumber: string;
+//   product: string | null;
+//   source: string | null;
+//   caseType: string | null;
+//   urgency: string | null;
+//   cardFirst4: string;
+//   cardLast4: string;
+//   comment: string;
+// };
 
 const CreateIncident = () => {
-  const form = useForm<CreateIncidentFormValues>({
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const form = useForm({
     initialValues: {
       customerName: "",
-      mobileNumber: "",
-      product: null,
-      source: null,
-      caseType: null,
-      severity: null,
+      phoneNumber: "",
+      productService: "",
+      source: "",
+      caseType: "",
+      urgency: "",
       cardFirst4: "",
       cardLast4: "",
       comment: "",
+      status: "Open",
     },
-    // validate: {
-    //   customerName: (value: {
-    //     trim: () => { (): any; new (): any; length: number };
-    //   }) => (value.trim().length === 0 ? "Customer name is required" : null),
-    //   mobileNumber: (value: {
-    //     trim: () => { (): any; new (): any; length: number };
-    //   }) => (value.trim().length === 0 ? "Mobile number is required" : null),
-    //   product: (value: any) =>
-    //     !value ? "Product / Service is required" : null,
-    //   source: (value: any) => (!value ? "Source is required" : null),
-    // },
   });
 
-  const handleSubmit = (values: CreateIncidentFormValues) => {
-    // Replace with your API call
-    console.log("Create incident payload:", values);
+  const handleSubmit = async (values: any) => {
+    setSuccess(null);
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await createIncident(values);
+      setSuccess("Incident created successfully!");
+      form.reset();
+      console.log("New Incident:", response);
+    } catch (err: any) {
+      console.log(err);
+      setError(err.response?.data?.message || "Failed to create incident");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div style={{ margin: "100px 0" }}>
-      <Container size="lg" py="xl">
-        <Title order={2} mb="lg">
-          Create Incident
-        </Title>
+    <Container size="lg" py="xl">
+      <Title order={2} mb="lg">
+        Create Incident
+      </Title>
 
-        <Paper withBorder radius="md" shadow="sm" p="lg">
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Stack gap="md">
-              <TextInput
-                label="Customer Name *"
-                placeholder="Enter customer name"
-                {...form.getInputProps("customerName")}
-              />
+      <Paper withBorder radius="md" shadow="sm" p="lg">
+        {success && (
+          <Alert icon={<IconCheck size={16} />} color="green" mb="md">
+            {success}
+          </Alert>
+        )}
 
-              <TextInput
-                label="Mobile Number *"
-                placeholder="Enter mobile number"
-                {...form.getInputProps("mobileNumber")}
-              />
+        {error && (
+          <Alert icon={<IconAlertTriangle size={16} />} color="red" mb="md">
+            {error}
+          </Alert>
+        )}
 
-              <Select
-                label="Product/Service *"
-                placeholder="-- Select Product/Service --"
-                data={productOptions}
-                searchable
-                nothingFoundMessage="No options"
-                {...form.getInputProps("product")}
-              />
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <Stack gap="md">
+            <TextInput
+              label="Customer Name"
+              {...form.getInputProps("customerName")}
+            />
 
-              <Select
-                label="Source *"
-                placeholder="-- Select Source --"
-                data={sourceOptions}
-                searchable
-                nothingFoundMessage="No options"
-                {...form.getInputProps("source")}
-              />
+            <TextInput
+              label="Mobile Number"
+              {...form.getInputProps("phoneNumber")}
+            />
 
-              <Select
-                label="Case Type"
-                placeholder="-- Select Case Type --"
-                data={caseTypeOptions}
-                {...form.getInputProps("caseType")}
-              />
+            <Select
+              label="Product/Service"
+              placeholder="-- Select Product/Service --"
+              data={[
+                "Electronic Cards",
+                "Loans",
+                "Electronic Banking",
+                "Investment",
+                "Account Operations",
+                "Others",
+              ]}
+              {...form.getInputProps("productService")}
+            />
 
-              <Select
-                label="Severity"
-                placeholder="-- Select Severity --"
-                data={severityOptions}
-                {...form.getInputProps("severity")}
-              />
+            <Select
+              label="Source"
+              placeholder="-- Select Source --"
+              data={[
+                "InBranch",
+                "Call Center",
+                "Online",
+                "ATM",
+                "Mobile Banking",
+                "Others",
+              ]}
+              {...form.getInputProps("source")}
+            />
 
-              <TextInput
-                label="Card First 4 Digits (for card issues)"
-                placeholder="1234"
-                maxLength={4}
-                {...form.getInputProps("cardFirst4")}
-              />
+            <Select
+              label="Case Type"
+              placeholder="-- Select Case Type --"
+              data={["Complaint", "Enquiry", "Request", "Feedback"]}
+              {...form.getInputProps("caseType")}
+            />
+            <Select
+              label="Status"
+              placeholder="-- Select Status --"
+              data={["Open", "Resolved", "Escalated"]}
+              {...form.getInputProps("status")}
+            />
 
-              <TextInput
-                label="Card Last 4 Digits (for card issues)"
-                placeholder="5678"
-                maxLength={4}
-                {...form.getInputProps("cardLast4")}
-              />
+            <Select
+              label="Urgency"
+              placeholder="-- Select Urgency/Severity --"
+              data={["Low", "Medium", "High", "Critical"]}
+              {...form.getInputProps("urgency")}
+            />
 
-              <Textarea
-                label="Comment / Description"
-                minRows={4}
-                placeholder="Describe the incident..."
-                {...form.getInputProps("comment")}
-              />
+            <TextInput
+              label="Card First 4 Digits"
+              maxLength={4}
+              {...form.getInputProps("cardFirst4")}
+            />
 
-              <Group mt="md">
-                <Button type="submit" color="orange">
-                  Save
-                </Button>
-                <Button type="submit" color="orange" variant="filled">
-                  Save & Create Another
-                </Button>
-                <Button type="button" variant="default">
-                  Cancel
-                </Button>
-              </Group>
-            </Stack>
-          </form>
-        </Paper>
-      </Container>
-    </div>
+            <TextInput
+              label="Card Last 4 Digits"
+              maxLength={4}
+              {...form.getInputProps("cardLast4")}
+            />
+
+            <Textarea
+              label="Comment / Description"
+              minRows={4}
+              {...form.getInputProps("comment")}
+            />
+
+            <Group>
+              <Button type="submit" color="orange" loading={loading}>
+                Submit
+              </Button>
+            </Group>
+          </Stack>
+        </form>
+      </Paper>
+    </Container>
   );
 };
 

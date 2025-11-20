@@ -4,6 +4,7 @@ import {
   AppShell,
   Box,
   Burger,
+  Button,
   Container,
   Divider,
   Group,
@@ -11,7 +12,8 @@ import {
   Text,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 const navLinks = [
   "Dashboard",
@@ -39,6 +41,10 @@ const NavLink = ({ label, to }: { label: string; to: string }) => (
 
 const Header = () => {
   const [opened, { toggle }] = useDisclosure(false);
+
+  const navigate = useNavigate();
+
+  const { logout, isLoggedIn } = useAuth();
 
   return (
     <div>
@@ -78,6 +84,17 @@ const Header = () => {
                   label={link}
                 />
               ))}
+              {isLoggedIn && (
+                <Button
+                  style={{ backgroundColor: "#f6a623" }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/login");
+                  }}
+                >
+                  Logout
+                </Button>
+              )}
             </Group>
 
             {/* Mobile burger */}
