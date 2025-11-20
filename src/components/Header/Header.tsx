@@ -17,11 +17,10 @@ const navLinks = [
   "Dashboard",
   "Incidents",
   "Create Incident",
-  "Customers",
   "Logs",
   "User management",
   "Reports",
-  "Logout",
+  // "Logout",
 ];
 
 const NavLink = ({ label, to }: { label: string; to: string }) => (
