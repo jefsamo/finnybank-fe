@@ -39,7 +39,7 @@ const NavLink = ({ label, to }: { label: string; to: string }) => (
 );
 
 const Header = () => {
-  const [opened, { toggle, close }] = useDisclosure(false);
+  const [opened, { toggle }] = useDisclosure(false);
 
   return (
     <div>

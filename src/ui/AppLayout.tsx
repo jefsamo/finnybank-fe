@@ -67,7 +67,7 @@ const IncidentStatCard = ({
 );
 
 const HomePage = () => {
-  const [opened, { toggle, close }] = useDisclosure(false);
+  const [opened, { toggle }] = useDisclosure(false);
 
   return (
     <AppShell

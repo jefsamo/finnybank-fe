@@ -82,8 +82,8 @@ function formatDate(d: Date | null) {
 }
 
 const Reports = () => {
-  const [from, setFrom] = useState<Date | null>(new Date("2025-10-20"));
-  const [to, setTo] = useState<Date | null>(new Date("2025-11-18"));
+  const [from] = useState<Date | null>(new Date("2025-10-20"));
+  const [to] = useState<Date | null>(new Date("2025-11-18"));
 
   const handleFilter = () => {
     // plug into your API / query here
