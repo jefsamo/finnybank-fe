@@ -63,8 +63,8 @@ const CreateIncident = () => {
       source: "",
       caseType: "",
       urgency: "",
-      cardFirst4: "",
-      cardLast4: "",
+      firstFourCardDigits: "",
+      lastFourCardDigits: "",
       comment: "",
       status: "Open",
     },
@@ -170,13 +170,13 @@ const CreateIncident = () => {
             <TextInput
               label="Card First 4 Digits"
               maxLength={4}
-              {...form.getInputProps("cardFirst4")}
+              {...form.getInputProps("firstFourCardDigits")}
             />
 
             <TextInput
               label="Card Last 4 Digits"
               maxLength={4}
-              {...form.getInputProps("cardLast4")}
+              {...form.getInputProps("lastFourCardDigits")}
             />
 
             <Textarea
