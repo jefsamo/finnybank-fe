@@ -89,6 +89,7 @@ const Header = () => {
                   style={{ backgroundColor: "#f6a623" }}
                   onClick={(e) => {
                     e.preventDefault();
+                    logout();
                     navigate("/login");
                   }}
                 >
