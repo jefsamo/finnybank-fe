@@ -27,7 +27,7 @@ function App() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/create-incident" element={<CreateIncident />} />
           <Route path="/user-management" element={<CreateUser />} />
-          <Route path="/incidents/1" element={<IncidentDetail />} />
+          <Route path="/incidents/:id" element={<IncidentDetail />} />
           <Route path="/logs" element={<AuditLogs />} />
         </Route>
         <Route path="/login" element={<Login />} />

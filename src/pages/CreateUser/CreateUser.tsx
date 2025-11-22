@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // UserManagementPage.tsx
 import {
   Button,
@@ -8,47 +9,92 @@ import {
   Stack,
   TextInput,
   Title,
+  Alert,
+  MultiSelect,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-
-type CreateUserFormValues = {
-  name: string;
-  email: string;
-  role: string | null;
-  department: string;
-  temporaryPassword: string;
-};
+import { useEffect, useState } from "react";
+import {
+  createUser,
+  fetchDepartments,
+  type Department,
+} from "../../services/project.services";
+import { IconAlertTriangle, IconCheck } from "@tabler/icons-react";
 
 const roleOptions = [
-  "Administrator",
-  "Supervisor",
-  "Agent",
-  "Auditor",
-  "Read Only",
+  { value: "admin", label: "Administrator" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "csa", label: "Customer Service Agent" },
+  { value: "auditor", label: "Auditor" },
 ];
 
+type CreateUserFormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  roles: string[]; // array, matches backend
+  departmentId: string;
+  password: string;
+};
+
 const CreateUser = () => {
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   const form = useForm<CreateUserFormValues>({
     initialValues: {
-      name: "",
-      email: "admin@finnybank.com",
-      role: null,
-      department: "",
-      temporaryPassword: "P@ssw0rd!",
+      firstName: "",
+      lastName: "",
+      email: "",
+      roles: [],
+      departmentId: "",
+      password: "",
     },
     validate: {
-      name: (value) => (value.trim().length === 0 ? "Name is required" : null),
-      email: (value) =>
-        /^\S+@\S+\.\S+$/.test(value) ? null : "Invalid email address",
-      role: (value) => (!value ? "Role is required" : null),
-      temporaryPassword: (value) =>
-        value.length < 8 ? "Password must be at least 8 characters" : null,
+      firstName: (v) => (!v.trim() ? "First name is required" : null),
+      lastName: (v) => (!v.trim() ? "Last name is required" : null),
+      email: (v) =>
+        /^\S+@\S+\.\S+$/.test(v) ? null : "Valid email is required",
+      roles: (v) => (v.length === 0 ? "Select at least one role" : null),
+      password: (v) =>
+        v.length < 8 ? "Password must be at least 8 characters" : null,
     },
   });
 
-  const handleSubmit = (values: CreateUserFormValues) => {
-    // plug into your API call here
-    console.log("Create user payload:", values);
+  useEffect(() => {
+    fetchDepartments()
+      .then(setDepartments)
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to load departments");
+      });
+  }, []);
+
+  const handleSubmit = async (values: CreateUserFormValues) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await createUser({
+        email: values.email,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        roles: values.roles, // already an array of codes
+        password: values.password,
+        departmentId: values.departmentId || undefined,
+      });
+      setSuccess("User created successfully");
+      form.reset();
+    } catch (err: any) {
+      console.error(err);
+      const msg =
+        err?.response?.data?.message || err?.message || "Failed to create user";
+      setError(Array.isArray(msg) ? msg.join(", ") : msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,12 +109,44 @@ const CreateUser = () => {
         </Title>
 
         <Paper withBorder radius="md" shadow="sm" p="lg" mb="xl">
+          {success && (
+            <Alert
+              mb="md"
+              color="green"
+              icon={<IconCheck size={16} />}
+              variant="light"
+              withCloseButton
+              onClose={() => setSuccess(null)}
+            >
+              {success}
+            </Alert>
+          )}
+
+          {error && (
+            <Alert
+              mb="md"
+              color="red"
+              icon={<IconAlertTriangle size={16} />}
+              variant="light"
+              withCloseButton
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
+          )}
+
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <Stack gap="md">
               <TextInput
-                label="Name"
-                placeholder="Enter full name"
-                {...form.getInputProps("name")}
+                label="First Name"
+                placeholder="Enter first name"
+                {...form.getInputProps("firstName")}
+              />
+
+              <TextInput
+                label="Last Name"
+                placeholder="Enter last name"
+                {...form.getInputProps("lastName")}
               />
 
               <TextInput
@@ -77,36 +155,40 @@ const CreateUser = () => {
                 {...form.getInputProps("email")}
               />
 
-              <Select
-                label="Role"
-                placeholder="-- Select Role --"
+              <MultiSelect
+                label="Roles"
+                placeholder="-- Select Role(s) --"
                 data={roleOptions}
-                {...form.getInputProps("role")}
+                {...form.getInputProps("roles")}
               />
 
-              <TextInput
-                label="Department (optional)"
-                placeholder="Enter department"
-                {...form.getInputProps("department")}
+              <Select
+                label="Department"
+                placeholder="Select department"
+                data={departments.map((d) => ({
+                  value: d._id,
+                  label: d.name,
+                }))}
+                {...form.getInputProps("departmentId")}
               />
 
               <PasswordInput
                 label="Temporary Password"
-                {...form.getInputProps("temporaryPassword")}
+                {...form.getInputProps("password")}
                 description="Password must be at least 8 characters with at least a number and a symbol."
               />
 
-              <Button type="submit" mt="sm" color="orange">
+              <Button
+                type="submit"
+                mt="sm"
+                style={{ backgroundColor: "#f6a623" }}
+                loading={loading}
+              >
                 Create User
               </Button>
             </Stack>
           </form>
         </Paper>
-
-        {/* You can plug an Existing Users table here later */}
-        <Title order={3} fw={500}>
-          Existing Users
-        </Title>
       </Container>
     </div>
   );

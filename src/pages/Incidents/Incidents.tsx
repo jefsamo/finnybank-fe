@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Incidents.tsx
-import { type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import {
   Container,
   Title,
@@ -7,54 +8,102 @@ import {
   Anchor,
   ScrollArea,
   Box,
+  Center,
+  Loader,
+  Text,
 } from "@mantine/core";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { fetchIncidents, type Incident } from "../../services/project.services";
 
-interface Incident {
-  reference: string;
-  date: string;
-  customer: string;
-  caseType: string;
-  product: string;
-  severity: string;
-  status: string;
-  assigned: string;
-}
+// interface Incident {
+//   reference: string;
+//   date: string;
+//   customer: string;
+//   caseType: string;
+//   product: string;
+//   severity: string;
+//   status: string;
+//   assigned: string;
+// }
 
-const INCIDENTS: Incident[] = [
-  {
-    reference: "20251117162014924244",
-    date: "2025-11-17 16:20",
-    customer: "JOSEPHINE",
-    caseType: "Complaint",
-    product: "Electronic Cards",
-    severity: "High",
-    status: "Escalated",
-    assigned: "ATM Channel Unit",
-  },
-  {
-    reference: "20251117161808743048",
-    date: "2025-11-17 16:18",
-    customer: "Samuel",
-    caseType: "Enquiry",
-    product: "Others",
-    severity: "Low",
-    status: "Resolved",
-    assigned: "Account Operations",
-  },
-  {
-    reference: "20251116190655777085",
-    date: "2025-11-16 19:06",
-    customer: "Samuel",
-    caseType: "Complaint",
-    product: "Electronic Cards",
-    severity: "High",
-    status: "Resolved",
-    assigned: "ATM Channel Unit",
-  },
-];
+// const INCIDENTS: Incident[] = [
+//   {
+//     reference: "20251117162014924244",
+//     date: "2025-11-17 16:20",
+//     customer: "JOSEPHINE",
+//     caseType: "Complaint",
+//     product: "Electronic Cards",
+//     severity: "High",
+//     status: "Escalated",
+//     assigned: "ATM Channel Unit",
+//   },
+//   {
+//     reference: "20251117161808743048",
+//     date: "2025-11-17 16:18",
+//     customer: "Samuel",
+//     caseType: "Enquiry",
+//     product: "Others",
+//     severity: "Low",
+//     status: "Resolved",
+//     assigned: "Account Operations",
+//   },
+//   {
+//     reference: "20251116190655777085",
+//     date: "2025-11-16 19:06",
+//     customer: "Samuel",
+//     caseType: "Complaint",
+//     product: "Electronic Cards",
+//     severity: "High",
+//     status: "Resolved",
+//     assigned: "ATM Channel Unit",
+//   },
+// ];
 
 const Incidents: FC = () => {
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await fetchIncidents();
+        setIncidents(data);
+      } catch (err: any) {
+        console.error(err);
+        setError(err?.response?.data?.message || "Failed to load incidents.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ margin: "50px 0" }}>
+        <Container size="lg" py="xl">
+          <Center>
+            <Loader />
+          </Center>
+        </Container>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container size="lg" py="xl">
+        <Text c="red" mb="md">
+          {error}
+        </Text>
+      </Container>
+    );
+  }
   return (
     <div style={{ marginTop: "100px" }}>
       <Container size="lg" py="xl">
@@ -93,23 +142,27 @@ const Incidents: FC = () => {
               </Table.Thead>
 
               <Table.Tbody>
-                {INCIDENTS.map((incident, index) => (
+                {incidents.map((incident, index) => (
                   <Table.Tr
-                    key={incident.reference}
+                    key={incident.referenceId}
                     style={{
                       backgroundColor: index % 2 === 1 ? "#fff7ee" : "#ffffff",
                     }}
                   >
-                    <Table.Td>{incident.reference}</Table.Td>
-                    <Table.Td>{incident.date}</Table.Td>
-                    <Table.Td>{incident.customer}</Table.Td>
+                    <Table.Td>{incident.referenceId}</Table.Td>
+                    <Table.Td>{incident.createdAt}</Table.Td>
+                    <Table.Td>{incident.customerName}</Table.Td>
                     <Table.Td>{incident.caseType}</Table.Td>
-                    <Table.Td>{incident.product}</Table.Td>
-                    <Table.Td>{incident.severity}</Table.Td>
-                    <Table.Td>{incident.status}</Table.Td>
-                    <Table.Td>{incident.assigned}</Table.Td>
+                    <Table.Td>{incident.productService}</Table.Td>
+                    <Table.Td>{incident.urgency}</Table.Td>
+                    <Table.Td>{incident.status ?? "open"}</Table.Td>
+                    <Table.Td>{incident.assignedTo ?? "Dept"}</Table.Td>
                     <Table.Td>
-                      <Anchor component={Link} to="/incidents/1" size="sm">
+                      <Anchor
+                        component="button"
+                        size="sm"
+                        onClick={() => navigate(`/incidents/${incident._id}`)}
+                      >
                         View
                       </Anchor>
                     </Table.Td>
