@@ -68,6 +68,37 @@ export interface Incident {
   timeToResolve?: string;
 }
 
+export interface SummaryRow {
+  label: string;
+  count: number;
+}
+
+export interface IncidentReportSummary {
+  from: string | null;
+  to: string | null;
+  bySeverity: SummaryRow[];
+  byType: SummaryRow[];
+  byDepartment: SummaryRow[];
+  slaCompliance: SummaryRow[];
+  avgResolutionHours: number;
+}
+
+export const fetchIncidentReport = async (
+  from?: string,
+  to?: string
+): Promise<IncidentReportSummary> => {
+  const res = await api.get<IncidentReportSummary>(
+    "/incident/incidents-summary",
+    {
+      params: {
+        from,
+        to,
+      },
+    }
+  );
+  return res.data;
+};
+
 export const fetchIncident = async (id: string): Promise<Incident> => {
   const res = await api.get<Incident>(`/incident/${id}`);
   return res.data;

@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // ReportsPage.tsx
 import {
+  Alert,
   Button,
+  Center,
   Container,
   Group,
+  Loader,
   Paper,
   Stack,
   Table,
@@ -11,30 +15,13 @@ import {
   Title,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { useState } from "react";
-
-type SummaryRow = { label: string; count: number };
-
-const bySeverity: SummaryRow[] = [
-  { label: "Low", count: 1 },
-  { label: "Medium", count: 0 },
-  { label: "High", count: 2 },
-];
-
-const byType: SummaryRow[] = [
-  { label: "Complaint", count: 2 },
-  { label: "Enquiry", count: 1 },
-];
-
-const byDepartment: SummaryRow[] = [
-  { label: "ATM Channel Unit", count: 2 },
-  { label: "Account Operations", count: 1 },
-];
-
-const slaCompliance: SummaryRow[] = [
-  { label: "Compliant", count: 2 },
-  { label: "Breached", count: 0 },
-];
+import { useEffect, useState } from "react";
+import {
+  fetchIncidentReport,
+  type IncidentReportSummary,
+  type SummaryRow,
+} from "../../services/project.services";
+import { IconAlertTriangle } from "@tabler/icons-react";
 
 function SummaryTable({
   title,
@@ -68,6 +55,15 @@ function SummaryTable({
                 <Table.Td>{row.count}</Table.Td>
               </Table.Tr>
             ))}
+            {rows.length === 0 && (
+              <Table.Tr>
+                <Table.Td colSpan={2}>
+                  <Text ta="center" c="dimmed">
+                    No data
+                  </Text>
+                </Table.Td>
+              </Table.Tr>
+            )}
           </Table.Tbody>
         </Table>
       </Paper>
@@ -75,32 +71,81 @@ function SummaryTable({
   );
 }
 
-function formatDate(d: Date | null) {
-  if (!d) return "";
-  // yyyy-mm-dd
-  return d.toISOString().slice(0, 10);
+function formatDateParam(value: Date | string | null) {
+  if (!value) return undefined;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  return parsed.toISOString();
 }
 
 const Reports = () => {
-  const [from] = useState<Date | null>(new Date("2025-10-20"));
-  const [to] = useState<Date | null>(new Date("2025-11-18"));
+  const [from, setFrom] = useState<Date | string | null>(null);
+  const [to, setTo] = useState<Date | string | null>(null);
+  const [summary, setSummary] = useState<IncidentReportSummary | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleFilter = () => {
-    // plug into your API / query here
-    console.log("Filter from", from, "to", to);
+  const loadReport = async (
+    fromDate?: Date | string | null,
+    toDate?: Date | string | null
+  ) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchIncidentReport(
+        formatDateParam(fromDate ?? from),
+        formatDateParam(toDate ?? to)
+      );
+      setSummary(data);
+    } catch (err: any) {
+      console.error(err);
+      const msg =
+        err?.response?.data?.message || err?.message || "Failed to load report";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const summaryRangeText =
-    from && to
-      ? `Incidents Summary (${formatDate(from)} to ${formatDate(to)})`
-      : "Incidents Summary";
+  // initial load (e.g. last 30 days, or all if you prefer)
+  useEffect(() => {
+    loadReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleFilter = () => {
+    loadReport(from, to);
+  };
+
+  if (loading && !summary) {
+    return (
+      <Container size="lg" py="xl">
+        <Center>
+          <Loader />
+        </Center>
+      </Container>
+    );
+  }
 
   return (
-    <div style={{ margin: "100px 0" }}>
+    <div style={{ margin: "50px 0" }}>
       <Container size="lg" py="xl">
         <Title order={2} mb="lg">
           Reports
         </Title>
+
+        {error && (
+          <Alert
+            mb="md"
+            color="red"
+            icon={<IconAlertTriangle size={16} />}
+            variant="light"
+            withCloseButton
+            onClose={() => setError(null)}
+          >
+            {error}
+          </Alert>
+        )}
 
         {/* Filter row */}
         <Group align="flex-end" gap="sm" wrap="wrap" mb="lg">
@@ -110,7 +155,7 @@ const Reports = () => {
             </Text>
             <DateInput
               value={from}
-              //   onChange={setFrom}
+              onChange={setFrom}
               valueFormat="MM/DD/YYYY"
               placeholder="Select date"
             />
@@ -122,58 +167,74 @@ const Reports = () => {
             </Text>
             <DateInput
               value={to}
-              //   onChange={setTo}
+              onChange={setTo}
               valueFormat="MM/DD/YYYY"
               placeholder="Select date"
             />
           </Stack>
 
-          <Button mt="md" color="orange" onClick={handleFilter}>
+          <Button
+            mt="md"
+            style={{ backgroundColor: "#f6a623" }}
+            onClick={handleFilter}
+            loading={loading}
+          >
             Filter
           </Button>
         </Group>
 
-        <Text fw={600} mb="sm">
-          {summaryRangeText}
-        </Text>
+        {summary && (
+          <>
+            <Text fw={600} mb="sm">
+              Incidents Summary{" "}
+              {summary.from && summary.to
+                ? `(${new Date(summary.from).toLocaleDateString()} - ${new Date(
+                    summary.to
+                  ).toLocaleDateString()})`
+                : ""}
+            </Text>
 
-        {/* Sections */}
-        <SummaryTable
-          title="By Severity"
-          headerLabel="Severity"
-          rows={bySeverity}
-        />
+            <SummaryTable
+              title="By Severity"
+              headerLabel="Severity"
+              rows={summary.bySeverity}
+            />
 
-        <SummaryTable title="By Type" headerLabel="Type" rows={byType} />
+            <SummaryTable
+              title="By Type"
+              headerLabel="Type"
+              rows={summary.byType}
+            />
 
-        <SummaryTable
-          title="By Department"
-          headerLabel="Department"
-          rows={byDepartment}
-        />
+            <SummaryTable
+              title="By Department"
+              headerLabel="Department"
+              rows={summary.byDepartment}
+            />
 
-        <SummaryTable
-          title="SLA Compliance"
-          headerLabel="Category"
-          rows={slaCompliance}
-        />
+            <SummaryTable
+              title="SLA Compliance"
+              headerLabel="Category"
+              rows={summary.slaCompliance}
+            />
 
-        {/* Average resolution + export */}
-        <Stack mt="lg" gap="xs">
-          <Text fw={600}>Average Resolution Time</Text>
-          <Text>0.00 hours</Text>
+            <Stack mt="lg" gap="xs">
+              <Text fw={600}>Average Resolution Time</Text>
+              <Text>{summary.avgResolutionHours.toFixed(2)} hours</Text>
 
-          <Button
-            mt="sm"
-            color="orange"
-            onClick={() => {
-              // hook up your CSV export here
-              console.log("Export CSV clicked");
-            }}
-          >
-            Export CSV
-          </Button>
-        </Stack>
+              <Button
+                mt="sm"
+                style={{ backgroundColor: "#f6a623" }}
+                onClick={() => {
+                  // TODO: call a CSV export endpoint or build CSV on frontend
+                  console.log("Export CSV clicked");
+                }}
+              >
+                Export CSV
+              </Button>
+            </Stack>
+          </>
+        )}
       </Container>
     </div>
   );
