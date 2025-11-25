@@ -1,69 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Incidents.tsx
-import { useEffect, useState, type FC } from "react";
+import { useEffect, useState } from "react";
+import { fetchIncidents, type Incident } from "../../services/project.services";
+import { useNavigate } from "react-router-dom";
 import {
-  Container,
-  Title,
-  Table,
   Anchor,
-  ScrollArea,
   Box,
   Center,
+  Container,
   Loader,
+  ScrollArea,
+  Table,
   Text,
+  Title,
 } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
-import { fetchIncidents, type Incident } from "../../services/project.services";
 
-// interface Incident {
-//   reference: string;
-//   date: string;
-//   customer: string;
-//   caseType: string;
-//   product: string;
-//   severity: string;
-//   status: string;
-//   assigned: string;
-// }
-
-// const INCIDENTS: Incident[] = [
-//   {
-//     reference: "20251117162014924244",
-//     date: "2025-11-17 16:20",
-//     customer: "JOSEPHINE",
-//     caseType: "Complaint",
-//     product: "Electronic Cards",
-//     severity: "High",
-//     status: "Escalated",
-//     assigned: "ATM Channel Unit",
-//   },
-//   {
-//     reference: "20251117161808743048",
-//     date: "2025-11-17 16:18",
-//     customer: "Samuel",
-//     caseType: "Enquiry",
-//     product: "Others",
-//     severity: "Low",
-//     status: "Resolved",
-//     assigned: "Account Operations",
-//   },
-//   {
-//     reference: "20251116190655777085",
-//     date: "2025-11-16 19:06",
-//     customer: "Samuel",
-//     caseType: "Complaint",
-//     product: "Electronic Cards",
-//     severity: "High",
-//     status: "Resolved",
-//     assigned: "ATM Channel Unit",
-//   },
-// ];
-
-const Incidents: FC = () => {
+const Alerts = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  // const escalatedEvents = incidents?.filter(
+  //   (incident: Incident) => incident.hasEscalation
+  // );
+  // console.log(escalatedEvents);
 
   useEffect(() => {
     const load = async () => {
@@ -71,8 +30,9 @@ const Incidents: FC = () => {
         setLoading(true);
         setError(null);
         const data = await fetchIncidents();
-        console.log(data);
-        setIncidents(data);
+
+        const escalated = data.filter((incident) => incident.hasEscalation);
+        setIncidents(escalated); // ✅ based on fresh data
       } catch (err: any) {
         console.error(err);
         setError(err?.response?.data?.message || "Failed to load incidents.");
@@ -109,7 +69,7 @@ const Incidents: FC = () => {
     <div style={{ marginTop: "100px" }}>
       <Container size="lg" py="xl">
         <Title order={2} mb="md">
-          Incidents
+          Alerts
         </Title>
 
         {/* Scroll horizontally on small screens */}
@@ -178,4 +138,4 @@ const Incidents: FC = () => {
   );
 };
 
-export default Incidents;
+export default Alerts;

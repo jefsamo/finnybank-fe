@@ -9,6 +9,7 @@ import Reports from "./pages/Reports/Reports";
 import CreateUser from "./pages/CreateUser/CreateUser";
 import Login from "./pages/Login/Login";
 import ProtectedRoute from "./ui/ProtectedRoute";
+import Alerts from "./pages/Alerts/Alerts";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/dashboard" element={<Home />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/alerts" element={<Alerts />} />
           <Route path="/create-incident" element={<CreateIncident />} />
           <Route path="/user-management" element={<CreateUser />} />
           <Route path="/incidents/:id" element={<IncidentDetail />} />

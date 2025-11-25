@@ -21,6 +21,7 @@ const navLinks = [
   "Create Incident",
   "Logs",
   "User management",
+  "Alerts",
   "Reports",
   // "Logout",
 ];

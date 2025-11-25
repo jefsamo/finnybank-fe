@@ -22,6 +22,7 @@ import {
   type SummaryRow,
 } from "../../services/project.services";
 import { IconAlertTriangle } from "@tabler/icons-react";
+import { exportToCsv } from "../../services/exportCsv";
 
 function SummaryTable({
   title,
@@ -226,8 +227,54 @@ const Reports = () => {
                 mt="sm"
                 style={{ backgroundColor: "#f6a623" }}
                 onClick={() => {
-                  // TODO: call a CSV export endpoint or build CSV on frontend
-                  console.log("Export CSV clicked");
+                  if (!summary) return;
+
+                  const rows: {
+                    category: string;
+                    label: string;
+                    count: number | string;
+                  }[] = [];
+
+                  summary.bySeverity.forEach((row) =>
+                    rows.push({
+                      category: "Severity",
+                      label: row.label,
+                      count: row.count,
+                    })
+                  );
+
+                  summary.byType.forEach((row) =>
+                    rows.push({
+                      category: "Type",
+                      label: row.label,
+                      count: row.count,
+                    })
+                  );
+
+                  summary.byDepartment.forEach((row) =>
+                    rows.push({
+                      category: "Department",
+                      label: row.label,
+                      count: row.count,
+                    })
+                  );
+
+                  summary.slaCompliance.forEach((row) =>
+                    rows.push({
+                      category: "SLA Compliance",
+                      label: row.label,
+                      count: row.count,
+                    })
+                  );
+
+                  // Add average resolution time as a final row
+                  rows.push({
+                    category: "Average Resolution Time",
+                    label: "Hours",
+                    count: summary.avgResolutionHours.toFixed(2),
+                  });
+
+                  exportToCsv("incident_report.csv", rows);
                 }}
               >
                 Export CSV
