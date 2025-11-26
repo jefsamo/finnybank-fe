@@ -36,7 +36,7 @@ import { IconAlertTriangle, IconCheck } from "@tabler/icons-react";
 // ];
 
 // const caseTypeOptions = ["Complaint", "Enquiry", "Request", "Feedback"];
-// const severityOptions = ["Low", "Medium", "High", "Critical"];
+// const severityOptions = ["Low", "Medium", "High"];
 
 // type CreateIncidentFormValues = {
 //   customerName: string;
@@ -164,7 +164,7 @@ const CreateIncident = () => {
               <Select
                 label="Urgency"
                 placeholder="-- Select Urgency/Severity --"
-                data={["Low", "Medium", "High", "Critical"]}
+                data={["Low", "Medium", "High"]}
                 {...form.getInputProps("urgency")}
               />
 
