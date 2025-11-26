@@ -8,10 +8,19 @@ import {
   Center,
   Loader,
   Alert,
+  Group,
+  Button,
+  Textarea,
+  Text,
 } from "@mantine/core";
-import { IconAlertTriangle } from "@tabler/icons-react";
+import { IconAlertTriangle, IconCheck } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { fetchIncident, type Incident } from "../../services/project.services";
+import {
+  fetchIncident,
+  updateIncident,
+  type Incident,
+  type UpdateIncidentAction,
+} from "../../services/project.services";
 import { useParams } from "react-router-dom";
 
 // interface IncidentDetails {
@@ -74,6 +83,11 @@ const IncidentDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [updating, setUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [updateSuccess, setUpdateSuccess] = useState<string | null>(null);
+  const [resolutionNotes, setResolutionNotes] = useState("");
+
   useEffect(() => {
     if (!id) return;
 
@@ -131,6 +145,34 @@ const IncidentDetail = () => {
       </Container>
     );
   }
+  const handleUpdate = async (action: UpdateIncidentAction) => {
+    if (!id) return;
+
+    try {
+      setUpdating(true);
+      setUpdateError(null);
+      setUpdateSuccess(null);
+
+      const updated = await updateIncident(id, {
+        resolutionNotes,
+        action,
+      });
+
+      setIncident(updated);
+      setUpdateSuccess(
+        action === "save" ? "Incident updated." : "Incident updated and closed."
+      );
+    } catch (err: any) {
+      console.error(err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to update incident";
+      setUpdateError(msg);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const formatDate = (value?: string) =>
     value ? new Date(value).toLocaleString() : "";
@@ -182,6 +224,75 @@ const IncidentDetail = () => {
               </Table.Tbody>
             </Table>
           </ScrollArea>
+        </Paper>
+        <br />
+        <br />
+        {/* 🔽 New: Update Incident section */}
+        <Title order={3} mb="sm">
+          Update Incident
+        </Title>
+
+        <Paper withBorder radius="md" shadow="sm" p="lg" mb="lg">
+          {updateSuccess && (
+            <Alert
+              mb="md"
+              color="green"
+              icon={<IconCheck size={16} />}
+              variant="light"
+              withCloseButton
+              onClose={() => setUpdateSuccess(null)}
+            >
+              {updateSuccess}
+            </Alert>
+          )}
+
+          {updateError && (
+            <Alert
+              mb="md"
+              color="red"
+              icon={<IconAlertTriangle size={16} />}
+              variant="light"
+              withCloseButton
+              onClose={() => setUpdateError(null)}
+            >
+              {updateError}
+            </Alert>
+          )}
+
+          <Text fw={500} mb="xs">
+            Resolution Details / Notes
+          </Text>
+
+          <Textarea
+            minRows={4}
+            value={resolutionNotes}
+            onChange={(e) => setResolutionNotes(e.currentTarget.value)}
+            placeholder="Enter resolution details or notes..."
+          />
+
+          <Group mt="md">
+            <Button
+              style={{ backgroundColor: "#f6a623" }}
+              loading={updating}
+              onClick={() => handleUpdate("save")}
+            >
+              Save
+            </Button>
+            <Button
+              style={{ backgroundColor: "#f6a623" }}
+              loading={updating}
+              onClick={() => handleUpdate("send_close")}
+            >
+              Send &amp; Close
+            </Button>
+            <Button
+              style={{ backgroundColor: "#f6a623" }}
+              loading={updating}
+              onClick={() => handleUpdate("save_close")}
+            >
+              Save &amp; Close
+            </Button>
+          </Group>
         </Paper>
       </Container>
     </div>

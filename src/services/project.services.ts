@@ -83,6 +83,40 @@ export interface IncidentReportSummary {
   avgResolutionHours: number;
 }
 
+// export interface Incident {
+//   _id: string;
+//   customerName: string;
+//   phoneNumber: string;
+//   productService: string;
+//   caseType: string;
+//   urgency: string;
+//   status: string;
+//   source: string;
+//   slaBreached: boolean;
+//   hasEscalation: boolean;
+//   referenceId: number;
+//   userId: string;
+//   createdAt: string;
+//   updatedAt: string;
+//   timeToResolve?: string;
+//   resolutionNotes?: string;
+// }
+
+export type UpdateIncidentAction = "save" | "save_close" | "send_close";
+
+export interface UpdateIncidentDto {
+  resolutionNotes: string;
+  action: UpdateIncidentAction;
+}
+
+export const updateIncident = async (
+  id: string,
+  payload: UpdateIncidentDto
+): Promise<Incident> => {
+  const res = await api.patch<Incident>(`/incidents/${id}`, payload);
+  return res.data;
+};
+
 export const fetchIncidentReport = async (
   from?: string,
   to?: string
