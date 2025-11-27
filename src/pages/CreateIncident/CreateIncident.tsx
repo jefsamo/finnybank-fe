@@ -13,44 +13,17 @@ import {
   Alert,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { createIncident } from "../../services/project.services";
-import { useState } from "react";
+import {
+  createIncident,
+  fetchDepartments,
+  type Department,
+} from "../../services/project.services";
+import { useEffect, useState } from "react";
 import { IconAlertTriangle, IconCheck } from "@tabler/icons-react";
 
-// const productOptions = [
-//   "Electronic Cards",
-//   "Loans",
-//   "Electronic Banking",
-//   "Investment",
-//   "Account Operations",
-//   "Others",
-// ];
-
-// const sourceOptions = [
-//   "InBranch",
-//   "Call Center",
-//   "Online",
-//   "ATM",
-//   "Mobile Banking",
-//   "Others",
-// ];
-
-// const caseTypeOptions = ["Complaint", "Enquiry", "Request", "Feedback"];
-// const severityOptions = ["Low", "Medium", "High"];
-
-// type CreateIncidentFormValues = {
-//   customerName: string;
-//   phoneNumber: string;
-//   product: string | null;
-//   source: string | null;
-//   caseType: string | null;
-//   urgency: string | null;
-//   cardFirst4: string;
-//   cardLast4: string;
-//   comment: string;
-// };
-
 const CreateIncident = () => {
+  const [departments, setDepartments] = useState<Department[]>([]);
+
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -67,6 +40,7 @@ const CreateIncident = () => {
       lastFourCardDigits: "",
       comment: "",
       status: "Open",
+      departmentId: "id",
     },
   });
 
@@ -87,6 +61,15 @@ const CreateIncident = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchDepartments()
+      .then(setDepartments)
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to load departments");
+      });
+  }, []);
 
   return (
     <div style={{ margin: "50px 0" }}>
@@ -123,14 +106,10 @@ const CreateIncident = () => {
               <Select
                 label="Product/Service"
                 placeholder="-- Select Product/Service --"
-                data={[
-                  "Electronic Cards",
-                  "Loans",
-                  "Electronic Banking",
-                  "Investment",
-                  "Account Operations",
-                  "Others",
-                ]}
+                data={departments.map((d) => ({
+                  value: d._id,
+                  label: d.name,
+                }))}
                 {...form.getInputProps("productService")}
               />
 
