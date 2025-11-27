@@ -9,9 +9,12 @@ import {
   Center,
   Loader,
   Text,
+  Group,
+  Button,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { fetchAuditLogs, type AuditLog } from "../../services/project.services";
+import { exportToCsv } from "../../services/exportCsv";
 
 const AuditLogs = () => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -40,6 +43,21 @@ const AuditLogs = () => {
     loadLogs();
   }, []);
 
+  const handleExportCsv = () => {
+    if (!logs.length) return;
+
+    const rows = logs.map((log) => ({
+      timestamp: new Date(log.createdAt).toISOString(),
+      name: log.name,
+      action: log.action,
+      ip: log.ip,
+      updatedAt: new Date(log.updatedAt as string).toISOString(),
+      id: log._id,
+    }));
+
+    exportToCsv("audit-logs.csv", rows);
+  };
+
   if (loading) {
     return (
       <div style={{ marginTop: "100px" }}>
@@ -64,9 +82,15 @@ const AuditLogs = () => {
   return (
     <div style={{ margin: "100px 0" }}>
       <Container size="xl" py="xl">
-        <Title order={2} mb="lg">
-          Audit Logs
-        </Title>
+        <Group justify="space-between" mb="lg">
+          <Title order={2}>Audit Logs</Title>
+          <Button
+            style={{ backgroundColor: "#f6a623" }}
+            onClick={handleExportCsv}
+          >
+            Export CSV
+          </Button>
+        </Group>
 
         <Paper withBorder radius="md" shadow="sm">
           <ScrollArea offsetScrollbars>

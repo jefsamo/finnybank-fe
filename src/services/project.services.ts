@@ -41,6 +41,7 @@ export interface Department {
 }
 
 export interface AuditLog {
+  updatedAt?: string | number | Date;
   _id: string;
   createdAt: string; // or createdAt in your DB
   name: string; // e.g. "Samuel Asante Jnr"
