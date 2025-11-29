@@ -124,7 +124,7 @@ const IncidentDetail = () => {
     value ? new Date(value).toLocaleString() : "";
 
   const rows: { label: string; value: string }[] = [
-    { label: "Reference ID", value: String(incident.referenceId) },
+    { label: "Reference ID", value: String(incident.referenceId || "1111") },
     { label: "Customer Name", value: incident.customerName },
     { label: "Phone Number", value: incident.phoneNumber },
     { label: "Product / Service", value: incident.productService },
@@ -174,72 +174,101 @@ const IncidentDetail = () => {
         <br />
         <br />
         {/* 🔽 New: Update Incident section */}
-        <Title order={3} mb="sm">
-          Update Incident
-        </Title>
 
-        <Paper withBorder radius="md" shadow="sm" p="lg" mb="lg">
-          {updateSuccess && (
-            <Alert
-              mb="md"
-              color="green"
-              icon={<IconCheck size={16} />}
-              variant="light"
-              withCloseButton
-              onClose={() => setUpdateSuccess(null)}
-            >
-              {updateSuccess}
-            </Alert>
-          )}
+        {incident.status === "open" && (
+          <div>
+            <Title order={3} mb="sm">
+              Update Incident
+            </Title>
 
-          {updateError && (
-            <Alert
-              mb="md"
-              color="red"
-              icon={<IconAlertTriangle size={16} />}
-              variant="light"
-              withCloseButton
-              onClose={() => setUpdateError(null)}
-            >
-              {updateError}
-            </Alert>
-          )}
+            <Paper withBorder radius="md" shadow="sm" p="lg" mb="lg">
+              {updateSuccess && (
+                <Alert
+                  mb="md"
+                  color="green"
+                  icon={<IconCheck size={16} />}
+                  variant="light"
+                  withCloseButton
+                  onClose={() => setUpdateSuccess(null)}
+                >
+                  {updateSuccess}
+                </Alert>
+              )}
 
-          <Text fw={500} mb="xs">
-            Resolution Details / Notes
-          </Text>
+              {updateError && (
+                <Alert
+                  mb="md"
+                  color="red"
+                  icon={<IconAlertTriangle size={16} />}
+                  variant="light"
+                  withCloseButton
+                  onClose={() => setUpdateError(null)}
+                >
+                  {updateError}
+                </Alert>
+              )}
 
-          <Textarea
-            minRows={4}
-            value={resolutionNotes}
-            onChange={(e) => setResolutionNotes(e.currentTarget.value)}
-            placeholder="Enter resolution details or notes..."
-          />
+              <Text fw={500} mb="xs">
+                Resolution Details / Notes
+              </Text>
 
-          <Group mt="md">
-            <Button
-              style={{ backgroundColor: "#f6a623" }}
-              loading={updating}
-              onClick={() => handleUpdate("save")}
-            >
-              Save
-            </Button>
-            <Button
-              style={{ backgroundColor: "#f6a623" }}
-              loading={updating}
-              onClick={() => handleUpdate("send_close")}
-            >
-              Send &amp; Close
-            </Button>
-            <Button
-              style={{ backgroundColor: "#f6a623" }}
-              loading={updating}
-              onClick={() => handleUpdate("save_close")}
-            >
-              Save &amp; Close
-            </Button>
-          </Group>
-        </Paper>
+              <Textarea
+                minRows={4}
+                value={resolutionNotes}
+                onChange={(e) => setResolutionNotes(e.currentTarget.value)}
+                placeholder="Enter resolution details or notes..."
+              />
+
+              <Group mt="md">
+                <Button
+                  style={{ backgroundColor: "#f6a623" }}
+                  loading={updating}
+                  onClick={() => handleUpdate("save")}
+                >
+                  Save
+                </Button>
+                <Button
+                  style={{ backgroundColor: "#f6a623" }}
+                  loading={updating}
+                  onClick={() => handleUpdate("send_close")}
+                >
+                  Send &amp; Close
+                </Button>
+                <Button
+                  style={{ backgroundColor: "#f6a623" }}
+                  loading={updating}
+                  onClick={() => handleUpdate("save_close")}
+                >
+                  Save &amp; Close
+                </Button>
+              </Group>
+
+              <Group mt="md">
+                <Button
+                  style={{ backgroundColor: "#f6a623" }}
+                  loading={updating}
+                  onClick={() => handleUpdate("save")}
+                >
+                  Save
+                </Button>
+                <Button
+                  style={{ backgroundColor: "#f6a623" }}
+                  loading={updating}
+                  onClick={() => handleUpdate("send_close")}
+                >
+                  Send &amp; Close
+                </Button>
+                <Button
+                  style={{ backgroundColor: "#f6a623" }}
+                  loading={updating}
+                  onClick={() => handleUpdate("save_close")}
+                >
+                  Save &amp; Close
+                </Button>
+              </Group>
+            </Paper>
+          </div>
+        )}
       </Container>
     </div>
   );

@@ -150,7 +150,7 @@ const Incidents: FC = () => {
                       backgroundColor: index % 2 === 1 ? "#fff7ee" : "#ffffff",
                     }}
                   >
-                    <Table.Td>{incident.referenceId}</Table.Td>
+                    <Table.Td>{incident.referenceId ?? "1111"}</Table.Td>
                     <Table.Td>{incident.createdAt}</Table.Td>
                     <Table.Td>{incident.customerName}</Table.Td>
                     <Table.Td>{incident.caseType}</Table.Td>
