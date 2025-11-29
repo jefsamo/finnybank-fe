@@ -23,60 +23,6 @@ import {
 } from "../../services/project.services";
 import { useParams } from "react-router-dom";
 
-// interface IncidentDetails {
-//   createdAt: string;
-//   customer: string;
-//   mobile: string;
-//   source: string;
-//   caseType: string;
-//   product: string;
-//   severity: string;
-//   status: string;
-//   assigned: string;
-//   slaDue: string;
-//   cardFirst4: string;
-//   cardLast4: string;
-//   comment: string;
-// }
-
-// interface AuditRecord {
-//   timestamp: string;
-//   user: string;
-//   action: string;
-//   description: string;
-// }
-
-// const details: IncidentDetails = {
-//   createdAt: "2025-11-17 16:20",
-//   customer: "JOSEPHINE",
-//   mobile: "0244212081",
-//   source: "InBranch",
-//   caseType: "Complaint",
-//   product: "Electronic Cards",
-//   severity: "High",
-//   status: "Escalated",
-//   assigned: "ATM Channel Unit",
-//   slaDue: "2025-11-18 16:20",
-//   cardFirst4: "5684",
-//   cardLast4: "3224",
-//   comment: "DAILY LIMIT EXCEEDED",
-// };
-
-// const auditHistory: AuditRecord[] = [
-//   {
-//     timestamp: "2025-11-19 12:58",
-//     user: "Samuel Asante Jnr",
-//     action: "ESCALATE",
-//     description: "Incident 3 escalated due to SLA breach",
-//   },
-//   {
-//     timestamp: "2025-11-19 12:58",
-//     user: "Samuel Asante Jnr",
-//     action: "RISK_ALERT",
-//     description: "Risk alert generated for incident 3",
-//   },
-// ];
-
 const IncidentDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [incident, setIncident] = useState<Incident | null>(null);

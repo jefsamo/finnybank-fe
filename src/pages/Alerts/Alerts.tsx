@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { fetchIncidents, type Incident } from "../../services/project.services";
+import {
+  fetchDepartment,
+  fetchIncidents,
+  type Department,
+  type Incident,
+} from "../../services/project.services";
+
 import { useNavigate } from "react-router-dom";
 import {
   Anchor,
@@ -18,7 +24,12 @@ const Alerts = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [departmentMap, setDepartmentMap] = useState<Record<string, string>>(
+    {}
+  );
+
   const navigate = useNavigate();
+  console.log(incidents);
   // const escalatedEvents = incidents?.filter(
   //   (incident: Incident) => incident.hasEscalation
   // );
@@ -30,9 +41,8 @@ const Alerts = () => {
         setLoading(true);
         setError(null);
         const data = await fetchIncidents();
-
         const escalated = data.filter((incident) => incident.hasEscalation);
-        setIncidents(escalated); // ✅ based on fresh data
+        setIncidents(escalated);
       } catch (err: any) {
         console.error(err);
         setError(err?.response?.data?.message || "Failed to load incidents.");
@@ -44,6 +54,40 @@ const Alerts = () => {
     load();
   }, []);
 
+  // 🔹 When incidents change, fetch their departments (deduped)
+  useEffect(() => {
+    const loadDepartments = async () => {
+      const ids = Array.from(
+        new Set(
+          incidents
+            .map((i) => i.departmentId)
+            .filter((id): id is string => Boolean(id))
+        )
+      ).filter((id) => !departmentMap[id]); // only fetch missing ones
+
+      if (!ids.length) return;
+
+      try {
+        const entries = await Promise.all(
+          ids.map(async (id) => {
+            const dept: Department = await fetchDepartment(id);
+            return [id, dept.name] as const;
+          })
+        );
+
+        setDepartmentMap((prev) => ({
+          ...prev,
+          ...Object.fromEntries(entries),
+        }));
+      } catch (err) {
+        console.error("Failed to load departments for alerts:", err);
+      }
+    };
+
+    if (incidents.length) {
+      loadDepartments();
+    }
+  }, [incidents, departmentMap]);
   if (loading) {
     return (
       <div style={{ margin: "50px 0" }}>
@@ -110,14 +154,21 @@ const Alerts = () => {
                       backgroundColor: index % 2 === 1 ? "#fff7ee" : "#ffffff",
                     }}
                   >
-                    <Table.Td>{incident.referenceId}</Table.Td>
-                    <Table.Td>{incident.createdAt}</Table.Td>
+                    <Table.Td>{incident.referenceId ?? "1111111"}</Table.Td>
+                    <Table.Td>
+                      {new Date(incident.createdAt).toLocaleString()}
+                    </Table.Td>
                     <Table.Td>{incident.customerName}</Table.Td>
                     <Table.Td>{incident.caseType}</Table.Td>
                     <Table.Td>{incident.productService}</Table.Td>
                     <Table.Td>{incident.urgency}</Table.Td>
                     <Table.Td>{incident.status ?? "open"}</Table.Td>
-                    <Table.Td>{incident.assignedTo ?? "Dept"}</Table.Td>
+                    <Table.Td>
+                      {" "}
+                      {incident.departmentId
+                        ? departmentMap[incident.departmentId] ?? "Loading..."
+                        : "Unassigned"}
+                    </Table.Td>
                     <Table.Td>
                       <Anchor
                         component="button"

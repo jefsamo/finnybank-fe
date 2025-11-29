@@ -24,6 +24,7 @@ export interface Incident {
   urgency: string;
   status: string;
   assignedTo: string;
+  departmentId?: string;
 }
 
 export interface CreateUserDto {
@@ -136,6 +137,11 @@ export const fetchIncidentReport = async (
 
 export const fetchIncident = async (id: string): Promise<Incident> => {
   const res = await api.get<Incident>(`/incident/${id}`);
+  return res.data;
+};
+
+export const fetchDepartment = async (id: string): Promise<Department> => {
+  const res = await api.get<Department>(`/department/${id}`);
   return res.data;
 };
 
