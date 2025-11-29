@@ -129,7 +129,7 @@ const Reports = () => {
   }
 
   return (
-    <div style={{ margin: "50px 0" }}>
+    <div style={{ margin: "100px 0" }}>
       <Container size="lg" py="xl">
         <Title order={2} mb="lg">
           Reports
