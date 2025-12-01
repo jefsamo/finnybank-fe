@@ -137,7 +137,7 @@ const Incidents: FC = () => {
                   <Table.Th>Product</Table.Th>
                   <Table.Th>Severity</Table.Th>
                   <Table.Th>Status</Table.Th>
-                  <Table.Th>Assigned</Table.Th>
+                  <Table.Th>Department</Table.Th>
                   <Table.Th>Actions</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -157,7 +157,7 @@ const Incidents: FC = () => {
                     <Table.Td>{incident.productService}</Table.Td>
                     <Table.Td>{incident.urgency}</Table.Td>
                     <Table.Td>{incident.status ?? "open"}</Table.Td>
-                    <Table.Td>{incident.assignedTo ?? "Dept"}</Table.Td>
+                    <Table.Td>{incident.productService}</Table.Td>
                     <Table.Td>
                       <Anchor
                         component="button"

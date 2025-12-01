@@ -162,7 +162,10 @@ const Alerts = () => {
                     <Table.Td>{incident.caseType}</Table.Td>
                     <Table.Td>{incident.productService}</Table.Td>
                     <Table.Td>{incident.urgency}</Table.Td>
-                    <Table.Td>{incident.status ?? "open"}</Table.Td>
+                    <Table.Td>
+                      {incident.status.charAt(0).toUpperCase() +
+                        incident.status.slice(1) || "Open"}
+                    </Table.Td>
                     <Table.Td>
                       {" "}
                       {incident.departmentId
