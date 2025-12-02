@@ -11,6 +11,7 @@ export interface CreateIncidentDto {
   lastFourCardDigits?: string;
   comment?: string;
   status?: string;
+  departmentId?: string;
 }
 
 export interface Incident {

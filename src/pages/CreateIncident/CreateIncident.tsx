@@ -40,7 +40,7 @@ const CreateIncident = () => {
       lastFourCardDigits: "",
       comment: "",
       status: "Open",
-      departmentId: "id",
+      departmentId: "",
     },
   });
 
@@ -50,7 +50,10 @@ const CreateIncident = () => {
     setLoading(true);
 
     try {
-      const response = await createIncident(values);
+      const response = await createIncident({
+        ...values,
+        departmentId: values.departmentId || undefined,
+      });
       setSuccess("Incident created successfully!");
       form.reset();
       console.log("New Incident:", response);
@@ -107,7 +110,7 @@ const CreateIncident = () => {
                 label="Product/Service"
                 placeholder="-- Select Product/Service --"
                 data={departments.map((d) => ({
-                  value: d._id,
+                  value: d.name,
                   label: d.name,
                 }))}
                 {...form.getInputProps("productService")}
