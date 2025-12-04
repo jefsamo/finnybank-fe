@@ -71,7 +71,6 @@ const Incidents: FC = () => {
         setLoading(true);
         setError(null);
         const data = await fetchIncidents();
-        console.log(data);
         setIncidents(data);
       } catch (err: any) {
         console.error(err);

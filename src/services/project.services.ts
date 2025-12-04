@@ -116,7 +116,7 @@ export const updateIncident = async (
   id: string,
   payload: UpdateIncidentDto
 ): Promise<Incident> => {
-  const res = await api.patch<Incident>(`/incidents/${id}`, payload);
+  const res = await api.patch<Incident>(`/incident/${id}`, payload);
   return res.data;
 };
 
@@ -158,6 +158,10 @@ export const fetchDepartments = async (): Promise<Department[]> => {
 
 export const createIncident = async (payload: CreateIncidentDto) => {
   const res = await api.post("/incident", payload);
+  return res.data;
+};
+export const markAsResolved = async (id: string) => {
+  const res = await api.patch(`/incident/${id}/resolved`);
   return res.data;
 };
 

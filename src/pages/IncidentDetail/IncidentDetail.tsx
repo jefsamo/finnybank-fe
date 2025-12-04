@@ -17,6 +17,7 @@ import { IconAlertTriangle, IconCheck } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import {
   fetchIncident,
+  markAsResolved,
   updateIncident,
   type Incident,
   type UpdateIncidentAction,
@@ -140,6 +141,31 @@ const IncidentDetail = () => {
     { label: "User ID", value: incident.userId },
   ];
 
+  const handleSaveAndClose = async () => {
+    if (!id) return;
+
+    try {
+      setUpdating(true);
+      setUpdateError(null);
+      setUpdateSuccess(null);
+
+      const resolvedIncident = await markAsResolved(id);
+
+      setIncident(resolvedIncident);
+
+      setUpdateSuccess("Incident updated and closed.");
+    } catch (err: any) {
+      console.error(err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to update and close incident";
+      setUpdateError(msg);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   return (
     <div style={{ margin: "50px 0" }}>
       <Container size="lg" py="xl">
@@ -175,7 +201,7 @@ const IncidentDetail = () => {
         <br />
         {/* 🔽 New: Update Incident section */}
 
-        {incident.status === "open" && (
+        {incident.status === "Open" && (
           <div>
             <Title order={3} mb="sm">
               Update Incident
@@ -237,31 +263,7 @@ const IncidentDetail = () => {
                 <Button
                   style={{ backgroundColor: "#f6a623" }}
                   loading={updating}
-                  onClick={() => handleUpdate("save_close")}
-                >
-                  Save &amp; Close
-                </Button>
-              </Group>
-
-              <Group mt="md">
-                <Button
-                  style={{ backgroundColor: "#f6a623" }}
-                  loading={updating}
-                  onClick={() => handleUpdate("save")}
-                >
-                  Save
-                </Button>
-                <Button
-                  style={{ backgroundColor: "#f6a623" }}
-                  loading={updating}
-                  onClick={() => handleUpdate("send_close")}
-                >
-                  Send &amp; Close
-                </Button>
-                <Button
-                  style={{ backgroundColor: "#f6a623" }}
-                  loading={updating}
-                  onClick={() => handleUpdate("save_close")}
+                  onClick={handleSaveAndClose}
                 >
                   Save &amp; Close
                 </Button>
