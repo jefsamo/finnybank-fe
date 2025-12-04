@@ -201,7 +201,7 @@ const IncidentDetail = () => {
         <br />
         {/* 🔽 New: Update Incident section */}
 
-        {incident.status === "Open" && (
+        {incident.status !== "Resolved" && (
           <div>
             <Title order={3} mb="sm">
               Update Incident
